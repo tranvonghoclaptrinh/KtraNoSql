@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cẩm Nang & Bộ Đề Luyện Thi NoSQL (MongoDB & Cassandra)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        mongo: '#13aa52',
+                        cassandra: '#146282'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        pre code { font-family: 'Fira Code', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        /* Mobile-first navigation and landscape reading improvements */
+        @media (max-width: 1023px) {
+            .brand-subtitle { display: none; }
+            .mobile-menu { display: none; }
+            .mobile-menu.is-open { display: block; }
+            .mobile-menu .nav-btn { width: 100%; justify-content: flex-start; }
+        }
+        @media (min-width: 1024px) {
+            .mobile-menu-toggle, .mobile-menu { display: none !important; }
+        }
+        @media (max-width: 1023px) and (orientation: landscape) {
+            header .header-inner { min-height: 4rem; }
+            main { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+            .landscape-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            footer { display: none; }
+        }
+        @media (max-width: 640px) and (orientation: portrait) {
+            h1 { max-width: 12rem; line-height: 1.15; }
+            main { padding-left: .75rem !important; padding-right: .75rem !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur border-b border-slate-800">
+        <div class="header-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-2 flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-emerald-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent truncate">
+                        NoSQL Exam Master Pro
+                    </h1>
+                    <p class="brand-subtitle text-xs text-slate-400 truncate">MongoDB & Cassandra • Đề Thi - Mẹo Lỗi - Bẫy Mảng & Aggregation</p>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex items-center relative w-72 shrink-0">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 text-slate-400 text-sm"></i>
+                <input type="search" id="globalSearch" oninput="filterContent()" placeholder="Tìm từ khóa ($elemMatch, $unwind, PK)..." 
+                    class="w-full bg-slate-800 text-xs text-slate-200 placeholder-slate-400 pl-9 pr-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 transition">
+            </div>
+
+            <nav class="hidden lg:flex items-center space-x-1 sm:space-x-2 text-xs font-semibold shrink-0">
+                <button onclick="switchTab('meo')" id="tab-meo" class="nav-btn px-3 py-2 rounded-lg transition bg-sky-600 text-white"><i class="fa-solid fa-lightbulb mr-1.5"></i> Mẹo & Bẫy Thi</button>
+                <button onclick="switchTab('cautruc')" id="tab-cautruc" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-cubes mr-1.5"></i> Cấu Trúc Chuẩn</button>
+                <button onclick="switchTab('de')" id="tab-de" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-file-code mr-1.5"></i> Bộ Đề & Đáp Án</button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-circle-question mr-1.5"></i> Luyện Trắc Nghiệm</button>
+            </nav>
+
+            <button type="button" class="mobile-menu-toggle lg:hidden shrink-0 w-10 h-10 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-800" aria-label="Mở menu" aria-expanded="false" onclick="toggleMobileMenu()">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+        </div>
+        <div id="mobile-menu" class="mobile-menu lg:hidden border-t border-slate-800 bg-slate-900 px-4 py-4">
+            <div class="relative mb-3">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                <input type="search" id="mobileSearch" oninput="filterContent()" placeholder="Tìm nội dung..." class="w-full bg-slate-800 text-xs text-slate-200 placeholder-slate-400 pl-9 pr-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500">
+            </div>
+            <nav class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold">
+                <button onclick="switchTab('meo')" id="mobile-tab-meo" class="nav-btn px-3 py-3 rounded-lg transition bg-sky-600 text-white text-left"><i class="fa-solid fa-lightbulb mr-1.5"></i> Mẹo & Bẫy Thi</button>
+                <button onclick="switchTab('cautruc')" id="mobile-tab-cautruc" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-cubes mr-1.5"></i> Cấu Trúc Chuẩn</button>
+                <button onclick="switchTab('de')" id="mobile-tab-de" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-file-code mr-1.5"></i> Bộ Đề & Đáp Án</button>
+                <button onclick="switchTab('quiz')" id="mobile-tab-quiz" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-circle-question mr-1.5"></i> Luyện Trắc Nghiệm</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: MẸO GIẢI ĐỀ VÀ BẪY THI -->
+        <section id="section-meo" class="tab-content space-y-6">
+            <div class="bg-gradient-to-r from-amber-500/10 via-slate-900 to-sky-500/10 p-6 rounded-2xl border border-amber-500/20">
+                <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Tổng Hợp "Bẫy" Hay Gặp Trong Đề Thi NoSQL
+                </h2>
+                <p class="text-sm text-slate-300 mt-1">Các lỗi kinh điển về Mảng lồng, $elemMatch, $unwind, $addFields, $lookup và Cassandra Keys/Indexes.</p>
+            </div>
+
+            <div class="landscape-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cassandra Reading Tricks -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-sky-900/50 hover:border-sky-500/50 transition">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                        <span class="text-base font-bold text-sky-400 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> Bẫy & Mẹo Cassandra CQL
+                        </span>
+                        <span class="bg-sky-950 text-sky-300 text-[10px] font-mono px-2 py-0.5 rounded">Cassandra</span>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-amber-300">Bẫy ORDER BY không đúng thứ tự Clustering Key:</strong> Trong CQL, nếu Primary Key là `((dept_id), created_at, user_id)`, bạn KHÔNG THỂ `ORDER BY user_id` nếu chưa chỉ định `created_at` trong mệnh đề `WHERE` hoặc `ORDER BY`.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-slate-100">Truy vấn trên Collections (SET, LIST, MAP):</strong> Để lọc phần tử trong Set/List phải tạo Index: <code class="text-amber-300">CREATE INDEX ON tbl(CONTAINS tags)</code>, sau đó query dùng <code class="text-sky-300">WHERE tags CONTAINS 'val'</code>. Đối với MAP thì dùng <code class="text-amber-300">KEYS(map_col)</code> hoặc <code class="text-amber-300">VALUES(map_col)</code>.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-amber-300">Bẫy Materialized View thiếu Primary Key gốc:</strong> MV bắt buộc phải chứa TOÀN BỘ các cột thuộc Primary Key của bảng gốc, cộng thêm cột mới được dùng làm PK cho MV.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- MongoDB Reading Tricks -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-emerald-900/50 hover:border-emerald-500/50 transition">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                        <span class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-leaf"></i> Bẫy & Mẹo MongoDB Aggregation & Mảng
+                        </span>
+                        <span class="bg-emerald-950 text-emerald-300 text-[10px] font-mono px-2 py-0.5 rounded">MongoDB</span>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-300">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-amber-300">Bẫy Mảng đơn vs Mảng Object với $elemMatch:</strong> 
+                                Với mảng đơn giá trị <code class="text-emerald-300">[10, 20, 30]</code>: dùng <code class="text-amber-300">{ scores: { $elemMatch: { $gte: 15, $lte: 25 } } }</code>.
+                                Với mảng Object: dùng <code class="text-amber-300 font-mono">{ items: { $elemMatch: { price: { $gt: 100 }, status: 'OK' } } }</code>. Nếu KHÔNG dùng <code class="text-emerald-300">$elemMatch</code>, MongoDB sẽ tìm document mà điều kiện 1 thỏa mãn ở Object A, điều kiện 2 thỏa mãn ở Object B (BỊ SAI)!
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-slate-100">Phân biệt $addFields / $set vs $project:</strong> 
+                                <code class="text-emerald-300">$addFields</code> (hoặc <code class="text-emerald-300">$set</code>) **giữ lại toàn bộ** các trường cũ và chỉ bổ sung/ghi đè trường mới. Còn <code class="text-amber-300">$project</code> sẽ **xóa sạch** các trường khác ngoại trừ những trường bạn khai báo `1`.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-amber-300">Bẫy $unwind làm nhân bản document & biến mảng trong $group:</strong> 
+                                Khi <code class="text-amber-300">$unwind</code> mảng `items`, mỗi phần tử trở thành 1 document riêng lẻ. Nếu muốn gom nhóm lại mảng ban đầu sau khi biến đổi, hãy dùng accumulator <code class="text-emerald-300 font-mono">$push</code> hoặc <code class="text-emerald-300 font-mono">$addToSet</code> (loại bỏ trùng lặp) trong stage <code class="text-sky-300">$group</code>!
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Cheat Table: Keyword to Syntax Translation -->
+            <div class="bg-slate-900 rounded-xl p-5 border border-slate-800">
+                <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-language text-sky-400"></i> Tra Cứu Nhanh Các Toán Tử Aggregation Tần Suất Thi Cao
+                </h3>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                                <th class="p-3">Mục đích yêu cầu đề bài</th>
+                                <th class="p-3">Toán tử / Stage tương ứng</th>
+                                <th class="p-3">Cú pháp ví dụ điển hình</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300 font-mono">
+                            <tr class="hover:bg-slate-800/50">
+                                <td class="p-3 font-sans font-medium text-amber-300">Tách mảng ra thành các bản ghi riêng lẻ</td>
+                                <td class="p-3 text-emerald-400">$unwind</td>
+                                <td class="p-3 text-sky-300">{ $unwind: { path: "$items", preserveNullAndEmptyArrays: true } }</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/50">
+                                <td class="p-3 font-sans font-medium text-amber-300">Tạo thêm trường mới (Tính toán tổng, nhân chia...)</td>
+                                <td class="p-3 text-emerald-400">$addFields / $set</td>
+                                <td class="p-3 text-sky-300">{ $addFields: { totalItemPrice: { $multiply: ["$price", "$quantity"] } } }</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/50">
+                                <td class="p-3 font-sans font-medium text-amber-300">Lọc 1 phần tử cụ thể bên trong mảng khi trả về</td>
+                                <td class="p-3 text-emerald-400">$filter / $elemMatch (projection)</td>
+                                <td class="p-3 text-sky-300">{ $project: { items: { $filter: { input: "$items", as: "i", cond: { $gte: ["$$i.score", 5] } } } } }</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/50">
+                                <td class="p-3 font-sans font-medium text-amber-300">Kết nối 2 Collection (JOIN) kèm điều kiện lọc</td>
+                                <td class="p-3 text-emerald-400">$lookup với Pipeline lồng</td>
+                                <td class="p-3 text-sky-300">{ $lookup: { from: "products", let: { pId: "$productId" }, pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$pId"] } } }], as: "productDetails" } }</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/50">
+                                <td class="p-3 font-sans font-medium text-amber-300">Gom nhóm & Thu thập danh sách giá trị không trùng</td>
+                                <td class="p-3 text-emerald-400">$group + $addToSet</td>
+                                <td class="p-3 text-sky-300">{ $group: { _id: "$category", uniqueTags: { $addToSet: "$tag" } } }</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: CẤU TRÚC CẦN NẮM -->
+        <section id="section-cautruc" class="tab-content hidden space-y-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+                <h2 class="text-xl font-bold text-sky-400 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-code-branch"></i> Các Khung Mẫu Cú Pháp Phức Tạp (Thi Tự Luận & Thực Hành)
+                </h2>
+                <p class="text-xs text-slate-400">Các mẫu Pipeline chuẩn mẫu xử lý mảng lồng, $unwind, $addFields và $lookup nâng cao.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Advanced Pipeline Template ($unwind + $addFields + $group) -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center justify-between">
+                        <span>1. Pipeline Mảng Lồng: $unwind $\rightarrow$ $addFields $\rightarrow$ $group</span>
+                        <span class="text-[10px] text-slate-400 font-mono">TÍNH TOÁN THEO CHI TIẾT ITEM</span>
+                    </h3>
+                    <pre class="bg-slate-950 p-4 rounded-lg text-xs text-emerald-300 border border-slate-800 overflow-x-auto font-mono"><code>db.<span class="text-amber-300">orders</span>.aggregate([
+  // 1. Tách mảng items thành từng document nhỏ
+  { <span class="text-sky-400">$unwind</span>: "$items" },
+  
+  // 2. Tính thành tiền từng item (price * quantity)
+  { <span class="text-sky-400">$addFields</span>: {
+      "items.subtotal": { <span class="text-amber-300">$multiply</span>: ["$items.price", "$items.qty"] }
+  }},
+  
+  // 3. Gom nhóm theo Đơn hàng để tính tổng tiền & tạo lại danh sách items
+  { <span class="text-sky-400">$group</span>: {
+      _id: "$_id",
+      customerId: { <span class="text-amber-300">$first</span>: "$customerId" },
+      totalOrderAmount: { <span class="text-amber-300">$sum</span>: "$items.subtotal" },
+      calculatedItems: { <span class="text-amber-300">$push</span>: "$items" }
+  }},
+  
+  // 4. Lọc đơn hàng có tổng tiền > 500
+  { <span class="text-sky-400">$match</span>: { totalOrderAmount: { $gt: 500 } } }
+]);</code></pre>
+                </div>
+
+                <!-- Advanced Lookup with Pipeline -->
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-sm font-bold text-sky-400 mb-3 flex items-center justify-between">
+                        <span>2. Khung $lookup với Pipeline Lồng (Custom Join)</span>
+                        <span class="text-[10px] text-slate-400 font-mono">JOIN CÓ ĐIỀU KIỆN LỌC</span>
+                    </h3>
+                    <pre class="bg-slate-950 p-4 rounded-lg text-xs text-sky-300 border border-slate-800 overflow-x-auto font-mono"><code>db.<span class="text-amber-300">orders</span>.aggregate([
+  {
+    <span class="text-emerald-400">$lookup</span>: {
+      from: "products",
+      let: { order_prod_id: "$productId" }, // Khai báo biến từ doc hiện tại
+      pipeline: [
+        {
+          <span class="text-emerald-400">$match</span>: {
+            <span class="text-amber-300">$expr</span>: {
+              <span class="text-sky-400">$and</span>: [
+                { <span class="text-sky-400">$eq</span>: ["$_id", "$$order_prod_id"] },
+                { <span class="text-sky-400">$eq</span>: ["$is_active", true] } // Chỉ lấy sản phẩm còn kinh doanh
+              ]
+            }
+          }
+        },
+        { <span class="text-emerald-400">$project</span>: { name: 1, price: 1, category: 1 } }
+      ],
+      as: "product_info"
+    }
+  },
+  // Flatten mảng kết quả join
+  { <span class="text-emerald-400">$unwind</span>: { path: "$product_info", preserveNullAndEmptyArrays: true } }
+]);</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: BỘ ĐỀ THI VÀ ĐÁP ÁN CHI TIẾT -->
+        <section id="section-de" class="tab-content hidden space-y-6">
+            <!-- Filter Bar for Exams -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-slate-400 font-medium">Lọc theo môn/chủ đề:</span>
+                    <button onclick="filterExam('all')" class="exam-filter-btn px-3 py-1 text-xs rounded-md bg-sky-600 text-white">Tất cả</button>
+                    <button onclick="filterExam('huit')" class="exam-filter-btn px-3 py-1 text-xs rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Đề Cassandra HUIT</button>
+                    <button onclick="filterExam('mongo')" class="exam-filter-btn px-3 py-1 text-xs rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700">Đề MongoDB Mảng & Aggregation</button>
+                </div>
+                <button onclick="toggleAllAnswers()" class="text-xs bg-slate-800 hover:bg-slate-700 text-sky-400 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                    <i class="fa-solid fa-eye mr-1"></i> Hiện / Ẩn Tất Cả Đáp Án
+                </button>
+            </div>
+
+            <!-- EXAM GROUP 1: HUIT LIBRARY (CASSANDRA) -->
+            <div class="exam-card huit space-y-4">
+                <div class="bg-gradient-to-r from-sky-950 to-slate-900 p-4 rounded-xl border border-sky-800/50 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-sky-300">PHẦN 1: BÀI TẬP CASSANDRA (MV, Collections & Bẫy Query)</h3>
+                        <p class="text-xs text-slate-400">Các bài toán phân vùng, Materialized View và chỉ mục dữ liệu tập hợp</p>
+                    </div>
+                    <span class="bg-sky-900/60 text-sky-300 text-xs px-2.5 py-1 rounded-full border border-sky-700">Cassandra</span>
+                </div>
+
+                <!-- Questions List -->
+                <div class="space-y-3">
+                    <!-- Q1 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-start justify-between cursor-pointer" onclick="toggleAnswer('ans-huit-1')">
+                            <div class="text-xs font-semibold text-slate-200">
+                                <span class="text-sky-400 font-bold">Câu 1:</span> Năm học 2024 – 2025 có bao nhiêu độc giả làm thẻ mới?
+                            </div>
+                            <span class="text-xs text-sky-400 hover:underline flex items-center gap-1">
+                                <span>Đáp án</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                        <div id="ans-huit-1" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs space-y-2">
+                            <p class="text-slate-400">💡 <strong class="text-slate-200">Phân tích:</strong> Lọc theo <code class="text-sky-300">academic_year</code> $\rightarrow$ Đưa <code class="text-sky-300">academic_year</code> làm Partition Key.</p>
+                            <pre class="bg-slate-950 p-3 rounded text-emerald-400 font-mono overflow-x-auto"><code>CREATE MATERIALIZED VIEW IF NOT EXISTS mv_readers_by_academic_year AS
+    SELECT academic_year, reader_id, reader_name, created_date
+    FROM readers
+    WHERE academic_year IS NOT NULL AND reader_id IS NOT NULL
+    PRIMARY KEY (academic_year, reader_id);
+
+-- Truy vấn:
+SELECT COUNT(*) AS total_new_readers 
+FROM mv_readers_by_academic_year 
+WHERE academic_year = '2024-2025';</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Q7 Cassandra Collections -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-start justify-between cursor-pointer" onclick="toggleAnswer('ans-cas-7')">
+                            <div class="text-xs font-semibold text-slate-200">
+                                <span class="text-sky-400 font-bold">Câu 2 (Nâng cao):</span> Cho bảng `student_courses` chứa trường `subjects_enrolled set<text>`. Hãy viết câu lệnh tạo Index và truy vấn tìm tất cả sinh viên đăng ký môn `'NoSQL'`?
+                            </div>
+                            <span class="text-xs text-sky-400 hover:underline flex items-center gap-1">
+                                <span>Đáp án</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                        <div id="ans-cas-7" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs space-y-2">
+                            <p class="text-slate-400">💡 <strong class="text-slate-200">Phân tích:</strong> Không thể tìm trong tập hợp `SET` bằng dấu `=` mà phải dùng chỉ mục `CONTAINS`.</p>
+                            <pre class="bg-slate-950 p-3 rounded text-emerald-400 font-mono overflow-x-auto"><code>-- Bước 1: Tạo Secondary Index trên tập hợp SET
+CREATE INDEX idx_subjects ON student_courses(CONTAINS subjects_enrolled);
+
+-- Bước 2: Thực hiện truy vấn lọc
+SELECT student_id, student_name, subjects_enrolled 
+FROM student_courses 
+WHERE subjects_enrolled CONTAINS 'NoSQL';</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXAM GROUP 2: MONGODB AGGREGATION, UNWIND, ADDFIELDS & ARRAYS -->
+            <div class="exam-card mongo space-y-4">
+                <div class="bg-gradient-to-r from-emerald-950 to-slate-900 p-4 rounded-xl border border-emerald-800/50 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-emerald-300">PHẦN 2: ĐỀ MONGODB (MẢNG LỒNG, $elemMatch, $unwind, $addFields, $lookup)</h3>
+                        <p class="text-xs text-slate-400">Chuyên đề câu hỏi gài bẫy xử lý mảng phức tạp & Pipeline Aggregation</p>
+                    </div>
+                    <span class="bg-emerald-900/60 text-emerald-300 text-xs px-2.5 py-1 rounded-full border border-emerald-700">MongoDB</span>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- Q Mongo 1 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-start justify-between cursor-pointer" onclick="toggleAnswer('ans-mongo-1')">
+                            <div class="text-xs font-semibold text-slate-200">
+                                <span class="text-emerald-400 font-bold">Câu 1 (Mảng Object & $elemMatch):</span> Cho collection `orders` với cấu trúc `items: [{ p_id: 'A', price: 10, qty: 2 }, { p_id: 'B', price: 50, qty: 1 }]`. Tìm các đơn hàng chứa CÙNG MỘT sản phẩm có `price > 20` VÀ `qty >= 2`.
+                            </div>
+                            <span class="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+                                <span>Đáp án</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                        <div id="ans-mongo-1" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs space-y-2">
+                            <p class="text-slate-400">💡 <strong class="text-slate-200">Giải thích bẫy:</strong> Nếu viết `{ "items.price": { $gt: 20 }, "items.qty": { $gte: 2 } }`, nó sẽ trả về cả đơn hàng có sản phẩm A giá 10 (qty 2) và sản phẩm B giá 50 (qty 1). Để ép điều kiện vào CÙNG 1 sản phẩm, BẮT BUỘC dùng <code class="text-emerald-300">$elemMatch</code>.</p>
+                            <pre class="bg-slate-950 p-3 rounded text-emerald-300 font-mono overflow-x-auto"><code>db.orders.find({
+  items: { 
+    $elemMatch: { 
+      price: { $gt: 20 }, 
+      qty: { $gte: 2 } 
+    } 
+  }
+});</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Q Mongo 2 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-start justify-between cursor-pointer" onclick="toggleAnswer('ans-mongo-3')">
+                            <div class="text-xs font-semibold text-slate-200">
+                                <span class="text-emerald-400 font-bold">Câu 2 ($unwind & $addFields):</span> Cho collection `orders`. Viết Pipeline:
+                                1. Tách mảng `items`.
+                                2. Thêm trường `subtotal = items.price * items.quantity`.
+                                3. Tính tổng thành tiền `totalAmount` cho từng đơn hàng và giữ lại danh sách các `subtotal` trong mảng.
+                            </div>
+                            <span class="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+                                <span>Đáp án</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                        <div id="ans-mongo-3" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs space-y-2">
+                            <pre class="bg-slate-950 p-3 rounded text-emerald-300 font-mono overflow-x-auto"><code>db.orders.aggregate([
+  // Bước 1: Tách mảng items (giữ lại doc nếu mảng rỗng)
+  { $unwind: { path: "$items", preserveNullAndEmptyArrays: true } },
+
+  // Bước 2: Dùng $addFields tính giá tiền nhân số lượng
+  { $addFields: {
+      "items.subtotal": { $multiply: ["$items.price", "$items.quantity"] }
+  }},
+
+  // Bước 3: Gom nhóm theo _id đơn hàng
+  { $group: {
+      _id: "$_id",
+      orderDate: { $first: "$orderDate" },
+      totalAmount: { $sum: "$items.subtotal" },
+      subtotalList: { $push: "$items.subtotal" }
+  }}
+]);</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Q Mongo 3 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-start justify-between cursor-pointer" onclick="toggleAnswer('ans-mongo-4')">
+                            <div class="text-xs font-semibold text-slate-200">
+                                <span class="text-emerald-400 font-bold">Câu 3 (So sánh 2 trường trên 1 document bằng $expr):</span> Tìm các sản phẩm trong `products` có giá bán thực tế (`salePrice`) THẤP HƠN giá vốn (`costPrice`).
+                            </div>
+                            <span class="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+                                <span>Đáp án</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                        <div id="ans-mongo-4" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs space-y-2">
+                            <p class="text-slate-400">💡 <strong class="text-slate-200">Bẫy:</strong> Không thể viết `{ salePrice: { $lt: "$costPrice" } }` trong `.find()` thông thường vì nó sẽ coi `"$costPrice"` là 1 chuỗi string tĩnh. BẮT BUỘC dùng toán tử biểu thức <code class="text-emerald-300">$expr</code>.</p>
+                            <pre class="bg-slate-950 p-3 rounded text-emerald-300 font-mono overflow-x-auto"><code>db.products.find({
+  $expr: {
+    $lt: ["$salePrice", "$costPrice"]
+  }
+});</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Q Mongo 4 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
+                        <div class="flex items-start justify-between cursor-pointer" onclick="toggleAnswer('ans-mongo-5')">
+                            <div class="text-xs font-semibold text-slate-200">
+                                <span class="text-emerald-400 font-bold">Câu 4 ($lookup + $unwind + $group):</span> Kết nối bảng `users` và `orders`. Thống kê tổng số tiền đã chi tiêu của từng người dùng (chỉ tính đơn `"DELIVERED"`), hiển thị `userName` và `totalSpent`.
+                            </div>
+                            <span class="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+                                <span>Đáp án</span> <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </span>
+                        </div>
+                        <div id="ans-mongo-5" class="hidden mt-3 pt-3 border-t border-slate-800 text-xs space-y-2">
+                            <pre class="bg-slate-950 p-3 rounded text-emerald-300 font-mono overflow-x-auto"><code>db.users.aggregate([
+  // Bước 1: Lookup nối sang bảng orders
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "userId",
+      as: "userOrders"
+    }
+  },
+  // Bước 2: Tách mảng orders
+  { $unwind: { path: "$userOrders", preserveNullAndEmptyArrays: false } },
+
+  // Bước 3: Lọc đơn hàng DELIVERED
+  { $match: { "userOrders.status": "DELIVERED" } },
+
+  // Bước 4: Gom nhóm theo User
+  {
+    $group: {
+      _id: "$_id",
+      userName: { $first: "$name" },
+      totalSpent: { $sum: "$userOrders.amount" }
+    }
+  },
+  { $sort: { totalSpent: -1 } }
+]);</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: TRẮC NGHIỆM TƯƠNG TÁC -->
+        <section id="section-quiz" class="tab-content hidden space-y-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad"></i> Luyện Thi Trắc Nghiệm Bẫy & Nâng Cao
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">10 câu hỏi trắc nghiệm rèn phản xạ nhận diện bẫy đề thi NoSQL.</p>
+                </div>
+                <div class="flex items-center space-x-3 text-xs font-mono">
+                    <span class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">Điểm: <strong id="quiz-score" class="text-emerald-400">0</strong> / <span id="quiz-total">10</span></span>
+                    <button onclick="resetQuiz()" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg transition">Làm lại</button>
+                </div>
+            </div>
+
+            <!-- Quiz Card Container -->
+            <div id="quiz-container" class="space-y-4">
+                <!-- Dynamic Questions Inserted Here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        <p>Hệ thống Ôn Thi NoSQL Master • Cập nhật chuyên sâu Mảng, Unwind, AddFields & Aggregation</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Tab Switching Logic
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const button = document.querySelector('.mobile-menu-toggle');
+            const open = menu.classList.toggle('is-open');
+            button.setAttribute('aria-expanded', String(open));
+            button.innerHTML = open ? '<i class="fa-solid fa-xmark text-lg"></i>' : '<i class="fa-solid fa-bars text-lg"></i>';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-800');
+            });
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll(`[id^="tab-"]`).forEach(btn => {
+                if (btn.id === `tab-${tabId}` || btn.id === `mobile-tab-${tabId}`) {
+                    btn.classList.add('bg-sky-600', 'text-white');
+                    btn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+                }
+            });
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('is-open')) toggleMobileMenu();
+        }
+
+        // Toggle Answer Visibility
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+        }
+
+        function toggleAllAnswers() {
+            const answers = document.querySelectorAll('[id^="ans-"]');
+            const isAnyHidden = Array.from(answers).some(ans => ans.classList.contains('hidden'));
+            answers.forEach(ans => {
+                if (isAnyHidden) ans.classList.remove('hidden');
+                else ans.classList.add('hidden');
+            });
+        }
+
+        // Filter Exam Cards
+        function filterExam(type) {
+            document.querySelectorAll('.exam-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            event.target.classList.add('bg-sky-600', 'text-white');
+
+            const cards = document.querySelectorAll('.exam-card');
+            cards.forEach(card => {
+                if (type === 'all' || card.classList.contains(type)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Global Search Filter
+        function filterContent() {
+            const desktopSearch = document.getElementById('globalSearch');
+            const mobileSearch = document.getElementById('mobileSearch');
+            const source = window.innerWidth >= 1024 ? desktopSearch : mobileSearch;
+            const query = (source?.value || '').toLowerCase();
+            if (desktopSearch && mobileSearch) {
+                desktopSearch.value = query;
+                mobileSearch.value = query;
+            }
+            const qBlocks = document.querySelectorAll('#section-de .bg-slate-900');
+            qBlocks.forEach(block => {
+                const text = block.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    block.style.display = 'block';
+                } else {
+                    block.style.display = 'none';
+                }
+            });
+        }
+
+        // Quiz Interactive Data (10 Expanded Questions)
+        const quizData = [
+            {
+                q: "1. Trong Cassandra, nếu chạy câu lệnh `SELECT * FROM users WHERE status = 'ACTIVE'` trên bảng có PRIMARY KEY (id) mà không có Secondary Index, điều gì sẽ xảy ra?",
+                options: [
+                    "Trả về kết quả bình thường sau khi lọc toàn bộ bảng.",
+                    "Báo lỗi yêu cầu phải truyền Partition Key hoặc dùng từ khóa ALLOW FILTERING.",
+                    "Tự động tạo thêm Index trên cột status.",
+                    "Xóa toàn bộ các dòng có status khác 'ACTIVE'."
+                ],
+                correct: 1,
+                explain: "Cassandra cấm quét toàn bộ các node (Full Cluster Scan) để bảo vệ hiệu năng trừ khi bạn ép buộc bằng từ khóa ALLOW FILTERING."
+            },
+            {
+                q: "2. Trong MongoDB Aggregation, nếu quên dấu '$' khi tính tổng trường price `{ $sum: 'price' }`, kết quả thu được là gì?",
+                options: [
+                    "MongoDB báo lỗi cú pháp không thực thi.",
+                    "Chuỗi chữ 'price' được cộng dồn và trả về giá trị 0.",
+                    "Vẫn tính tổng giá trị cột price như bình thường.",
+                    "Tự động xóa trường price trong kết quả trả về."
+                ],
+                correct: 1,
+                explain: "Không có dấu '$', MongoDB hiểu 'price' là một chuỗi văn bản tĩnh chứ không phải đường dẫn tới giá trị của trường."
+            },
+            {
+                q: "3. Cho Mảng Object `items: [{ score: 8, status: 'A' }, { score: 3, status: 'B' }]`. Truy vấn nào đảm bảo tìm document có CÙNG MỘT item có `score > 5` VÀ `status == 'B'`?",
+                options: [
+                    "db.col.find({ 'items.score': { $gt: 5 }, 'items.status': 'B' })",
+                    "db.col.find({ items: { $elemMatch: { score: { $gt: 5 }, status: 'B' } } })",
+                    "db.col.find({ items: { score: { $gt: 5 }, status: 'B' } })",
+                    "db.col.find({ $and: [{ 'items.score': { $gt: 5 } }, { 'items.status': 'B' }] })"
+                ],
+                correct: 1,
+                explain: "Dùng dot notation ('items.score') không ép 2 điều kiện vào cùng 1 object trong mảng. Bắt buộc dùng $elemMatch."
+            },
+            {
+                q: "4. Sự khác biệt chính giữa $addFields (hoặc $set) và $project trong MongoDB Aggregation là gì?",
+                options: [
+                    "$addFields làm tăng kích thước bộ nhớ gấp đôi $project.",
+                    "$addFields giữ nguyên tất cả các trường cũ và chỉ thêm/sửa trường mới, còn $project mặc định ẩn các trường không được khai báo.",
+                    "$project chỉ dùng được ở cuối Pipeline.",
+                    "Cả hai hoàn toàn giống hệt nhau không khác biệt."
+                ],
+                correct: 1,
+                explain: "$addFields giúp giữ lại nguyên vẹn cấu trúc document cũ mà không cần phải liệt kê lại từng trường như $project."
+            },
+            {
+                q: "5. Hành vi mặc định của stage `{ $unwind: '$tags' }` khi gặp document có `tags: []` (mảng rỗng) hoặc `tags: null` là gì?",
+                options: [
+                    "Giữ nguyên document đó trong tập kết quả.",
+                    "Loại bỏ (xóa) hoàn toàn document đó khỏi kết quả.",
+                    "Biến mảng rỗng thành ['null'].",
+                    "Báo lỗi dừng đường ống Aggregation."
+                ],
+                correct: 1,
+                explain: "Mặc định $unwind sẽ bỏ các document không chứa mảng hợp lệ. Để giữ lại cần dùng option preserveNullAndEmptyArrays: true."
+            },
+            {
+                q: "6. Muốn so sánh 2 trường `price` và `cost` trên CÙNG MỘT document trong truy vấn `.find()`, toán tử nào là bắt buộc?",
+                options: [
+                    "$elemMatch",
+                    "$where",
+                    "$expr",
+                    "$match"
+                ],
+                correct: 2,
+                explain: "Toán tử $expr cho phép sử dụng các biểu thức Aggregation bên trong truy vấn find() để so sánh giữa 2 trường của cùng document."
+            },
+            {
+                q: "7. Trong Cassandra, câu lệnh `ORDER BY` hoạt động dựa trên quy tắc nào?",
+                options: [
+                    "Sắp xếp được trên bất kỳ cột nào trong bảng.",
+                    "Chỉ sắp xếp được trên Clustering Key và phải cung cấp đầy đủ Partition Key trong mệnh đề WHERE.",
+                    "Chỉ áp dụng được khi bảng có dưới 1000 dòng.",
+                    "Chỉ hoạt động khi kết hợp với ALLOW FILTERING."
+                ],
+                correct: 1,
+                explain: "Cassandra lưu trữ dữ liệu sắp xếp vật lý theo Clustering Key bên trong từng Partition, nên ORDER BY bắt buộc phải truyền Partition Key."
+            },
+            {
+                q: "8. Trong MongoDB Aggregation, accumulator nào trong $group dùng để thu thập danh sách giá trị KHÔNG TRÙNG LẶP vào một mảng?",
+                options: [
+                    "$push",
+                    "$addToSet",
+                    "$concatArrays",
+                    "$mergeObjects"
+                ],
+                correct: 1,
+                explain: "$addToSet thêm phần tử vào mảng và tự động loại bỏ các giá trị trùng lặp (tương tự tập hợp Set)."
+            },
+            {
+                q: "9. Trong Cassandra CQL, làm thế nào để truy vấn tìm các bản ghi có chứa giá trị trong cột thuộc kiểu `SET` hoặc `LIST`?",
+                options: [
+                    "Dùng toán tử IN.",
+                    "Tạo Secondary Index trên tập hợp với `CONTAINS` và query `WHERE col CONTAINS 'val'`. ",
+                    "Dùng toán tử LIKE.",
+                    "Cassandra không hỗ trợ tìm kiếm trong Set/List."
+                ],
+                correct: 1,
+                explain: "Để query kiểu dữ liệu Collection trong Cassandra, cần tạo chỉ mục Index dùng `CONTAINS` hoặc `KEYS` / `VALUES`."
+            },
+            {
+                q: "10. Khi kết hợp 2 collection bằng `$lookup`, trường kết quả trả về (`as`) mặc định có dạng dữ liệu gì?",
+                options: [
+                    "Một Subdocument (Object)",
+                    "Một Mảng (Array) các document khớp điều kiện",
+                    "Một chuỗi JSON String",
+                    "Một giá trị Boolean"
+                ],
+                correct: 1,
+                explain: "$lookup luôn trả về kết quả dưới dạng một Mảng (Array), ngay cả khi chỉ tìm thấy 1 document thỏa mãn."
+            }
+        ];
+
+        let userScore = 0;
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            document.getElementById('quiz-total').innerText = quizData.length;
+
+            quizData.forEach((item, qIdx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3';
+                card.innerHTML = `
+                    <p class="text-xs font-semibold text-slate-100">${item.q}</p>
+                    <div class="space-y-2 font-sans">
+                        ${item.options.map((opt, oIdx) => `
+                            <button onclick="checkAnswer(${qIdx}, ${oIdx})" id="opt-${qIdx}-${oIdx}" 
+                                class="w-full text-left text-xs p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-sky-500 text-slate-300 transition">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="explain-${qIdx}" class="hidden p-3 bg-slate-950 rounded border text-xs text-slate-300"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function checkAnswer(qIdx, oIdx) {
+            const item = quizData[qIdx];
+            const explainEl = document.getElementById(`explain-${qIdx}`);
+            
+            // Disable all options for this question
+            item.options.forEach((_, idx) => {
+                const btn = document.getElementById(`opt-${qIdx}-${idx}`);
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed');
+                if (idx === item.correct) {
+                    btn.classList.remove('bg-slate-950', 'border-slate-800');
+                    btn.classList.add('bg-emerald-950', 'border-emerald-500', 'text-emerald-300');
+                }
+            });
+
+            if (oIdx === item.correct) {
+                userScore++;
+                document.getElementById('quiz-score').innerText = userScore;
+                explainEl.className = "p-3 bg-emerald-950/40 border border-emerald-800 rounded text-xs text-emerald-300";
+                explainEl.innerHTML = `✅ <strong>Chính xác!</strong> ${item.explain}`;
+            } else {
+                const wrongBtn = document.getElementById(`opt-${qIdx}-${oIdx}`);
+                wrongBtn.classList.remove('bg-slate-950', 'border-slate-800');
+                wrongBtn.classList.add('bg-rose-950', 'border-rose-500', 'text-rose-300');
+                
+                explainEl.className = "p-3 bg-rose-950/40 border border-rose-800 rounded text-xs text-rose-300";
+                explainEl.innerHTML = `❌ <strong>Chưa chính xác!</strong> ${item.explain}`;
+            }
+            explainEl.classList.remove('hidden');
+        }
+
+        function resetQuiz() {
+            userScore = 0;
+            document.getElementById('quiz-score').innerText = '0';
+            renderQuiz();
+        }
+
+        // Initialize Page
+        window.onload = function() {
+            renderQuiz();
+        }
+    </script>
+</body>
+</html>
