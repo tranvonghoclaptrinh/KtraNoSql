@@ -87,6 +87,7 @@
                 <button onclick="switchTab('cautruc')" id="tab-cautruc" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-cubes mr-1.5"></i> Cấu Trúc Chuẩn</button>
                 <button onclick="switchTab('de')" id="tab-de" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-file-code mr-1.5"></i> Bộ Đề & Đáp Án</button>
                 <button onclick="switchTab('quiz')" id="tab-quiz" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-circle-question mr-1.5"></i> Luyện Trắc Nghiệm</button>
+                <button onclick="switchTab('cheat')" id="tab-cheat" class="nav-btn px-3 py-2 rounded-lg transition text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-bolt mr-1.5"></i> Cheat Sheet</button>
             </nav>
 
             <button type="button" class="mobile-menu-toggle lg:hidden shrink-0 w-10 h-10 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-800" aria-label="Mở menu" aria-expanded="false" onclick="toggleMobileMenu()">
@@ -103,6 +104,7 @@
                 <button onclick="switchTab('cautruc')" id="mobile-tab-cautruc" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-cubes mr-1.5"></i> Cấu Trúc Chuẩn</button>
                 <button onclick="switchTab('de')" id="mobile-tab-de" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-file-code mr-1.5"></i> Bộ Đề & Đáp Án</button>
                 <button onclick="switchTab('quiz')" id="mobile-tab-quiz" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-circle-question mr-1.5"></i> Luyện Trắc Nghiệm</button>
+                <button onclick="switchTab('cheat')" id="mobile-tab-cheat" class="nav-btn px-3 py-3 rounded-lg transition text-slate-300 hover:bg-slate-800 text-left"><i class="fa-solid fa-bolt mr-1.5"></i> Cheat Sheet MongoDB</button>
             </nav>
         </div>
     </header>
@@ -506,6 +508,68 @@ WHERE subjects_enrolled CONTAINS 'NoSQL';</code></pre>
 ]);</code></pre>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 5: CHEAT SHEET MONGODB AGGREGATE -->
+        <section id="section-cheat" class="tab-content hidden space-y-6">
+            <div class="bg-gradient-to-r from-emerald-500/15 via-slate-900 to-sky-500/15 p-6 rounded-2xl border border-emerald-500/30">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Cheat Sheet MongoDB Aggregate</h2>
+                        <p class="text-sm text-slate-300 mt-1">Ôn nhanh các toán tử MongoDB Aggregate thường gặp trong bài kiểm tra.</p>
+                    </div>
+                    <span class="text-xs font-mono bg-emerald-950 text-emerald-300 px-3 py-1.5 rounded-lg border border-emerald-800">MongoDB • Quick Reference</span>
+                </div>
+            </div>
+
+            <div class="landscape-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-base font-bold text-sky-400 mb-4"><span class="text-slate-500 mr-2">01</span> Các Stage chính</h3>
+                    <div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr class="text-left text-slate-400 border-b border-slate-700"><th class="py-2 pr-3">Toán tử</th><th class="py-2 pr-3">Nghĩa</th><th class="py-2">Cách dùng nhanh</th></tr></thead><tbody class="divide-y divide-slate-800"><tr><td class="py-2 pr-3 font-mono text-emerald-300">$match</td><td class="py-2 pr-3">Lọc document</td><td class="py-2">Giống WHERE</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$group</td><td class="py-2 pr-3">Gom nhóm</td><td class="py-2">Giống GROUP BY</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$project</td><td class="py-2 pr-3">Chọn/tạo field</td><td class="py-2">Giống SELECT</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$set</td><td class="py-2 pr-3">Thêm/sửa field</td><td class="py-2">Tạo hoặc thay đổi field</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$unwind</td><td class="py-2 pr-3">Tách mảng</td><td class="py-2">1 phần tử → 1 document</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$lookup</td><td class="py-2 pr-3">JOIN collection khác</td><td class="py-2">Giống JOIN</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$sort</td><td class="py-2 pr-3">Sắp xếp</td><td class="py-2">1 tăng, -1 giảm</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$limit / $skip</td><td class="py-2 pr-3">Giới hạn / bỏ qua</td><td class="py-2">Lấy hoặc bỏ N document</td></tr><tr><td class="py-2 pr-3 font-mono text-emerald-300">$count</td><td class="py-2 pr-3">Đếm document</td><td class="py-2">Stage riêng</td></tr></tbody></table></div>
+                </div>
+
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-base font-bold text-amber-400 mb-4"><span class="text-slate-500 mr-2">02</span> Toán tử điều kiện</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs"><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$eq</b><span class="text-slate-400"> — Bằng</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$ne</b><span class="text-slate-400"> — Khác</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$gt / $gte</b><span class="text-slate-400"> — &gt; / ≥</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$lt / $lte</b><span class="text-slate-400"> — &lt; / ≤</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$in</b><span class="text-slate-400"> — Thuộc danh sách</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$nin</b><span class="text-slate-400"> — Không thuộc</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$and / $or</b><span class="text-slate-400"> — AND / OR</span></div><div class="bg-slate-950 p-2 rounded"><b class="font-mono text-emerald-300">$not</b><span class="text-slate-400"> — Phủ định</span></div><div class="bg-slate-950 p-2 rounded col-span-2"><b class="font-mono text-emerald-300">$exists</b><span class="text-slate-400"> — Field tồn tại, ví dụ </span><code class="text-sky-300">{email: {$exists: true}}</code></div></div>
+                </div>
+
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-base font-bold text-violet-400 mb-4"><span class="text-slate-500 mr-2">03</span> Accumulator trong $group</h3>
+                    <div class="grid sm:grid-cols-2 gap-2 text-xs"><div><b class="font-mono text-emerald-300">$sum</b> — Tổng / đếm<br><code class="text-slate-400">{ $sum: "$diem" }</code></div><div><b class="font-mono text-emerald-300">$sum: 1</b> — Đếm document</div><div><b class="font-mono text-emerald-300">$avg</b> — Trung bình</div><div><b class="font-mono text-emerald-300">$max / $min</b> — Lớn nhất / nhỏ nhất</div><div><b class="font-mono text-emerald-300">$first / $last</b> — Phần tử đầu / cuối</div><div><b class="font-mono text-emerald-300">$push</b> — Gom thành mảng</div><div class="sm:col-span-2"><b class="font-mono text-emerald-300">$addToSet</b> — Gom mảng và tự loại giá trị trùng</div></div>
+                </div>
+
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-base font-bold text-rose-400 mb-4"><span class="text-slate-500 mr-2">04–05</span> Mảng & xử lý giá trị</h3>
+                    <div class="space-y-3 text-xs text-slate-300"><p><code class="text-emerald-300">{ $unwind: "$monHoc" }</code> tách từng phần tử mảng thành một document riêng.</p><p><code class="text-emerald-300">preserveNullAndEmptyArrays: true</code> giữ document khi mảng rỗng, null hoặc không tồn tại.</p><div class="grid grid-cols-2 gap-2 border-t border-slate-800 pt-3"><span><b class="font-mono text-emerald-300">$add</b> — Cộng</span><span><b class="font-mono text-emerald-300">$subtract</b> — Trừ</span><span><b class="font-mono text-emerald-300">$multiply</b> — Nhân</span><span><b class="font-mono text-emerald-300">$divide</b> — Chia</span><span><b class="font-mono text-emerald-300">$mod</b> — Chia lấy dư</span><span><b class="font-mono text-emerald-300">$concat</b> — Nối chuỗi</span><span><b class="font-mono text-emerald-300">$size</b> — Số phần tử mảng</span><span><b class="font-mono text-emerald-300">$arrayElemAt</b> — Lấy phần tử theo vị trí</span><span><b class="font-mono text-emerald-300">$cond</b> — IF / ELSE</span><span><b class="font-mono text-emerald-300">$expr</b> — Biểu thức điều kiện</span></div></div>
+                </div>
+
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 md:col-span-2">
+                    <h3 class="text-base font-bold text-cyan-400 mb-4"><span class="text-slate-500 mr-2">06</span> $lookup — JOIN collection</h3>
+                    <div class="grid sm:grid-cols-4 gap-2 text-xs mb-4"><div class="bg-slate-950 rounded p-3"><b class="font-mono text-emerald-300">from</b><br><span class="text-slate-400">Collection muốn JOIN</span></div><div class="bg-slate-950 rounded p-3"><b class="font-mono text-emerald-300">localField</b><br><span class="text-slate-400">Field ở collection hiện tại</span></div><div class="bg-slate-950 rounded p-3"><b class="font-mono text-emerald-300">foreignField</b><br><span class="text-slate-400">Field ở collection bên kia</span></div><div class="bg-slate-950 rounded p-3"><b class="font-mono text-emerald-300">as</b><br><span class="text-slate-400">Tên field chứa kết quả JOIN</span></div></div>
+                    <pre class="bg-slate-950 p-4 rounded-lg text-xs text-emerald-300 overflow-x-auto"><code>db.sinhvien.aggregate([
+  {
+    $lookup: {
+      from: "monhoc",
+      localField: "maMH",
+      foreignField: "maMH",
+      as: "monHoc"
+    }
+  }
+])</code></pre>
+                </div>
+
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-base font-bold text-orange-400 mb-4"><span class="text-slate-500 mr-2">07–08</span> $count, $sum: 1 và "$field"</h3>
+                    <ul class="space-y-2 text-xs text-slate-300"><li><code class="text-emerald-300">$count</code>: đếm tổng document sau stage trước, ví dụ <code class="text-sky-300">{ $count: "soLuong" }</code>.</li><li><code class="text-emerald-300">$sum: 1</code>: đếm document theo từng nhóm.</li><li><code class="text-emerald-300">{ $sum: "$diem" }</code>: tính tổng một field.</li><li><code class="text-emerald-300">"$diem"</code> là giá trị field trong document hiện tại; không có <code>$</code> thì là chuỗi tĩnh.</li></ul>
+                </div>
+
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800">
+                    <h3 class="text-base font-bold text-lime-400 mb-4"><span class="text-slate-500 mr-2">09–10</span> Pipeline mẫu & thứ tự ưu tiên</h3>
+                    <p class="text-xs text-slate-300 mb-3">Đọc pipeline: <b class="text-white">lọc → tách mảng → gom nhóm → đếm/tính toán → sắp xếp</b>.</p>
+                    <div class="flex flex-wrap gap-1.5 text-[11px] font-mono"><span class="bg-sky-950 text-sky-300 px-2 py-1 rounded">$match</span><span>→</span><span class="bg-violet-950 text-violet-300 px-2 py-1 rounded">$group</span><span>→</span><span class="bg-amber-950 text-amber-300 px-2 py-1 rounded">$project</span><span>→</span><span class="bg-rose-950 text-rose-300 px-2 py-1 rounded">$unwind</span><span>→</span><span class="bg-cyan-950 text-cyan-300 px-2 py-1 rounded">$lookup</span><span>→</span><span class="bg-emerald-950 text-emerald-300 px-2 py-1 rounded">$sort</span><span>→</span><span>$count → $sum → $avg → $max → $min → $first → $last → $push → $addToSet → $expr → $size → $in → $gte/$gt/$lte/$lt</span></div>
                 </div>
             </div>
         </section>
